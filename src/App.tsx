@@ -443,7 +443,7 @@ function DashboardAdmin() {
                   <select value={filterGedung} onChange={(e) => setFilterGedung(e.target.value)} className="bg-slate-50 border text-xs font-bold text-slate-600 rounded-lg px-3 py-2 outline-none w-full"><option value="">Semua Gedung</option><option value="EKA">EKA</option><option value="DWI">DWI</option></select>
                   <div className="flex gap-2 w-full">
                     <select value={filterLantai} onChange={(e) => setFilterLantai(e.target.value)} className="w-1/2 bg-slate-50 border text-xs font-bold rounded-lg px-3 py-2 outline-none"><option value="">Lantai</option><option value="1">Lt 1</option><option value="2">Lt 2</option><option value="3">Lt 3</option><option value="4">Lt 4</option></select>
-                    <input type="text" placeholder="Kmr (12)" value={filterKamar} onChange={(e) => setFilterKamar(e.target.value)} className="w-1/2 bg-slate-50 border text-xs font-bold rounded-lg px-3 py-2 outline-none" />
+                    <input type="text" placeholder="Kmr (123)" value={filterKamar} onChange={(e) => setFilterKamar(e.target.value)} className="w-1/2 bg-slate-50 border text-xs font-bold rounded-lg px-3 py-2 outline-none" />
                   </div>
                 </div>
                 <div className="flex-1 w-full min-h-[150px]"><ResponsiveContainer width="100%" height="100%"><BarChart data={chartData} margin={{ left: -20, top: 10 }}><XAxis dataKey="name" tick={{fontSize: 11}} /><YAxis allowDecimals={false} tick={{fontSize: 11}} /><Tooltip /><Bar dataKey="Jumlah" fill="#3a7bd5" radius={[6,6,0,0]} barSize={40} /></BarChart></ResponsiveContainer></div>
@@ -503,7 +503,7 @@ function DashboardAdmin() {
                        <td className="px-4 py-4 align-top"><p className="bg-slate-50 px-3 py-2 rounded-lg border text-xs text-slate-600">{t.kendala}</p></td>
                        <td className="px-4 py-4 align-top">
                          <div className="flex flex-col gap-2">
-                           <select value={t.status} onChange={(e) => ubahStatus(t.id, e.target.value)} className={`w-32 text-xs font-bold rounded-lg p-2 border outline-none ${t.status === 'Pending' ? 'bg-orange-50 text-orange-700 border-orange-200' : t.status === 'Proses' ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'}`}><option value="Pending">🕒 Pending</option><option value="Proses">⚙️ Diproses</option><option value="Selesai">✅ Selesai</option></select>
+                           <select value={t.status} onChange={(e) => ubahStatus(t.id, e.target.value)} className={`w-32 text-xs font-bold rounded-lg p-2 border outline-none ${t.status === 'Pending' ? 'bg-orange-50 text-orange-700 border-orange-200' : t.status === 'Proses' ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'}`}><option value="Pending">🕒 Menunggu</option><option value="Proses">⚙️ Dikerjakan</option><option value="Selesai">✅ Selesai</option></select>
                            <button onClick={() => hapusTiket(t.id)} className="w-32 bg-red-50 text-red-600 px-3 py-2 rounded-lg hover:bg-red-100 font-bold text-xs text-center">Hapus</button>
                          </div>
                        </td>

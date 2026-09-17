@@ -17,8 +17,8 @@
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "bka-helpdesk-db",
-      "database_id": "26a79fe7-1f65-446e-aec2-cc6cd5a89a6b",
+      "database_name": "helpdesk-db-publik",
+      "database_id": "a280b55e-39aa-4c04-a1f5-cccec1f5fae5",
     },
   ],
   /**
