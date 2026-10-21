@@ -93,7 +93,7 @@ function FormKeluhan() {
             </div>
             <div>
               <label className="block text-xs font-semibold text-gray-600 uppercase mb-1">Kamar</label>
-              <input type="text" name="kamar" required placeholder="Ex: 123" className="w-full px-4 py-2 bg-gray-50 border rounded-lg outline-none" />
+              <input type="text" name="kamar" required placeholder="213" className="w-full px-4 py-2 bg-gray-50 border rounded-lg outline-none" />
             </div>
           </div>
           <div>
@@ -271,7 +271,7 @@ function DashboardAdmin() {
 
   const navigate = useNavigate();
 
-  // Fungsi penarik data dengan opsi sembunyikan loading
+  // Fungsi penarik data 
   const fetchTiket = async (sembunyiLoading = false) => {
     const token = localStorage.getItem("adminToken");
     if (!token) {
@@ -483,7 +483,7 @@ function DashboardAdmin() {
                   <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="flex-1 md:flex-none min-w-[120px] bg-white border text-sm rounded-lg px-3 py-2"><option value="">Semua Status</option><option value="Pending">Menunggu</option><option value="Proses">Dikerjakan</option><option value="Selesai">Selesai</option></select>
                   <select value={filterGedung} onChange={(e) => setFilterGedung(e.target.value)} className="flex-1 md:flex-none min-w-[120px] bg-white border text-sm rounded-lg px-3 py-2"><option value="">Semua Gedung</option><option value="EKA">EKA</option><option value="DWI">DWI</option></select>
                   <select value={filterLantai} onChange={(e) => setFilterLantai(e.target.value)} className="flex-1 md:flex-none min-w-[120px] bg-white border text-sm rounded-lg px-3 py-2"><option value="">Lantai</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select>
-                  <input type="text" placeholder="Kamar (12)" value={filterKamar} onChange={(e) => setFilterKamar(e.target.value)} className="flex-1 md:flex-none min-w-[100px] bg-white border text-sm rounded-lg px-3 py-2" />
+                  <input type="text" placeholder="Kamar (213)" value={filterKamar} onChange={(e) => setFilterKamar(e.target.value)} className="flex-1 md:flex-none min-w-[100px] bg-white border text-sm rounded-lg px-3 py-2" />
                   <button onClick={() => { setFilterGedung(''); setFilterLantai(''); setFilterKamar(''); setFilterStatus(''); }} className="w-full md:w-auto mt-2 md:mt-0 text-sm font-bold text-blue-600 bg-blue-50 md:bg-transparent rounded-lg py-2 px-3 hover:bg-blue-100">Reset</button>
                </div>
              </div>
