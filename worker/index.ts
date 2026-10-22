@@ -1,6 +1,6 @@
-import { drizzle } from 'drizzle-orm/d1';
-import { eq, desc } from 'drizzle-orm';
-import { tickets } from '../src/db/schema.ts'
+import { drizzle } from "drizzle-orm/d1";
+import { eq, desc } from "drizzle-orm";
+import { tickets } from "../src/db/schema.ts";
 
 export interface Env {
   DB: D1Database;
@@ -17,31 +17,30 @@ async function kirimNotifikasiTelegram(env: Env, dataTiket: any) {
   if (!env.TELEGRAM_BOT_TOKEN || !env.TELEGRAM_CHAT_ID) return;
 
   const url = `https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`;
-  const pesan = `🚨 *TIKET KENDALA BARU* 🚨\n\n*ID:* ${dataTiket.id}\n*Nama:* ${dataTiket.nama}\n*Lokasi:* Gedung ${dataTiket.gedung}, Lt.${dataTiket.lantai}, Kmr.${dataTiket.kamar}\n*Kendala:* ${dataTiket.kendala}\n\n*Waktu:* ${new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })}`;
+  const pesan = `🚨 *TIKET KENDALA BARU* 🚨\n\n*ID:* ${dataTiket.id}\n*Nama:* ${dataTiket.nama}\n*Lokasi:* Gedung ${dataTiket.gedung}, Lt.${dataTiket.lantai}, Kmr.${dataTiket.kamar}\n*Kendala:* ${dataTiket.kendala}\n\n*Waktu:* ${new Date().toLocaleString("id-ID", { timeZone: "Asia/Jakarta" })}`;
 
   // 1. Memisahkan string dari env menjadi array, lalu menghapus spasi jika ada
-  const chatIds = env.TELEGRAM_CHAT_ID.split(',').map(id => id.trim());
+  const chatIds = env.TELEGRAM_CHAT_ID.split(",").map((id) => id.trim());
 
   // 2. Lakukan perulangan untuk mengirim pesan ke setiap chat_id
   for (const chatId of chatIds) {
     if (!chatId) continue; // Lewati jika ada elemen kosong akibat salah ketik koma
-    
+
     try {
       await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           chat_id: chatId, // Menggunakan ID hasil perulangan
           text: pesan,
-          parse_mode: 'Markdown'
-        })
+          parse_mode: "Markdown",
+        }),
       });
     } catch (e) {
       console.error(`Gagal mengirim pesan ke ID ${chatId}:`, e);
     }
   }
 }
-
 
 // 2. Fungsi Kirim Email (Saat Tiket Dibuat)
 async function kirimEmailPenghuni(env: Env, dataTiket: any) {
@@ -70,9 +69,10 @@ async function kirimEmailPenghuni(env: Env, dataTiket: any) {
     </div>
   `;
 
-  try { await fetch(env.GOOGLE_SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ to: dataTiket.email, subject: `[${dataTiket.id}] Laporan Kendala Diterima`, html: htmlEmail }) }); } catch (e) {}
+  try {
+    await fetch(env.GOOGLE_SCRIPT_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ to: dataTiket.email, subject: `[${dataTiket.id}] Laporan Kendala Diterima`, html: htmlEmail }) });
+  } catch (e) {}
 }
-
 
 async function kirimEmailSelesai(env: Env, dataTiket: any) {
   if (!env.GOOGLE_SCRIPT_URL || !dataTiket.email) return;
@@ -101,19 +101,21 @@ async function kirimEmailSelesai(env: Env, dataTiket: any) {
 
   try {
     await fetch(env.GOOGLE_SCRIPT_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         to: dataTiket.email,
         subject: `[${dataTiket.id}] Laporan Kendala Telah Selesai ✅`,
-        html: htmlEmail
-      })
+        html: htmlEmail,
+      }),
     });
-  } catch (e) { console.error("Gagal kirim via Google Script", e); }
+  } catch (e) {
+    console.error("Gagal kirim via Google Script", e);
+  }
 }
 
 function cekOtorisasi(request: Request, env: Env) {
-  const authHeader = request.headers.get('Authorization');
+  const authHeader = request.headers.get("Authorization");
   return authHeader === `Bearer ${env.ADMIN_TOKEN}`;
 }
 
@@ -121,74 +123,80 @@ export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
 
-    if (url.pathname === '/api/tiket' && request.method === 'POST') {
+    if (url.pathname === "/api/tiket" && request.method === "POST") {
       try {
         const db = drizzle(env.DB);
         const data = await request.json<any>();
         const ticketId = `IT-${Math.floor(Math.random() * 9000) + 1000}`;
 
-        await db.insert(tickets).values({
-          id: ticketId,
-          nama: data.nama,
-          email: data.email,
-          gedung: data.gedung,
-          lantai: data.lantai,
-          kamar: data.kamar,
-          kendala: data.kendala,
-          status: 'Pending' 
-        }).returning();
-        await Promise.all([ kirimNotifikasiTelegram(env, { id: ticketId, ...data }), kirimEmailPenghuni(env, { id: ticketId, ...data }) ]);
+        await db
+          .insert(tickets)
+          .values({
+            id: ticketId,
+            nama: data.nama,
+            email: data.email,
+            gedung: data.gedung,
+            lantai: data.lantai,
+            kamar: data.kamar,
+            kendala: data.kendala,
+            status: "Pending",
+          })
+          .returning();
+        await Promise.all([kirimNotifikasiTelegram(env, { id: ticketId, ...data }), kirimEmailPenghuni(env, { id: ticketId, ...data })]);
 
-        return new Response(JSON.stringify({ success: true, ticketId }), { status: 200, headers: { 'Content-Type': 'application/json' } });
-      } catch (error: any) { return new Response(JSON.stringify({ success: false, error: error.message }), { status: 500 }); }
+        return new Response(JSON.stringify({ success: true, ticketId }), { status: 200, headers: { "Content-Type": "application/json" } });
+      } catch (error: any) {
+        return new Response(JSON.stringify({ success: false, error: error.message }), { status: 500 });
+      }
     }
 
     const statusMatch = url.pathname.match(/^\/api\/tiket\/(IT-\d+)$/);
-    if (statusMatch && request.method === 'GET') {
+    if (statusMatch && request.method === "GET") {
       try {
         const db = drizzle(env.DB);
         const hasilCari = await db.select().from(tickets).where(eq(tickets.id, statusMatch[1])).limit(1);
-        if (hasilCari.length === 0) return new Response(JSON.stringify({ success: false, error: 'Tiket tidak ditemukan' }), { status: 404 });
-        return new Response(JSON.stringify({ success: true, data: hasilCari[0] }), { status: 200, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate' } });
-      } catch (error: any) { return new Response(JSON.stringify({ success: false, error: error.message }), { status: 500 }); }
+        if (hasilCari.length === 0) return new Response(JSON.stringify({ success: false, error: "Tiket tidak ditemukan" }), { status: 404 });
+        return new Response(JSON.stringify({ success: true, data: hasilCari[0] }), { status: 200, headers: { "Content-Type": "application/json", "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate" } });
+      } catch (error: any) {
+        return new Response(JSON.stringify({ success: false, error: error.message }), { status: 500 });
+      }
     }
 
-    if (url.pathname === '/api/admin/login' && request.method === 'POST') {
+    if (url.pathname === "/api/admin/login" && request.method === "POST") {
       const data = await request.json<any>();
-      if (data.username === env.ADMIN_USERNAME && data.password === env.ADMIN_PASSWORD) return new Response(JSON.stringify({ success: true, token: env.ADMIN_TOKEN }), { status: 200, headers: { 'Content-Type': 'application/json' } });
-      return new Response(JSON.stringify({ success: false, error: 'Kredensial salah' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
+      if (data.username === env.ADMIN_USERNAME && data.password === env.ADMIN_PASSWORD) return new Response(JSON.stringify({ success: true, token: env.ADMIN_TOKEN }), { status: 200, headers: { "Content-Type": "application/json" } });
+      return new Response(JSON.stringify({ success: false, error: "Kredensial salah" }), { status: 401, headers: { "Content-Type": "application/json" } });
     }
 
-    if (url.pathname === '/api/admin/tickets' && request.method === 'GET') {
+    if (url.pathname === "/api/admin/tickets" && request.method === "GET") {
       if (!cekOtorisasi(request, env)) return new Response("Unauthorized", { status: 401 });
       const db = drizzle(env.DB);
       const semuaTiket = await db.select().from(tickets).orderBy(desc(tickets.createdAt));
-      return new Response(JSON.stringify({ success: true, data: semuaTiket }), { status: 200, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
+      return new Response(JSON.stringify({ success: true, data: semuaTiket }), { status: 200, headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
     }
 
     const ticketMatch = url.pathname.match(/^\/api\/admin\/tickets\/(IT-\d+)$/);
     if (ticketMatch) {
       if (!cekOtorisasi(request, env)) return new Response("Unauthorized", { status: 401 });
       const db = drizzle(env.DB);
-      
-      if (request.method === 'PATCH') {
+
+      if (request.method === "PATCH") {
         const data = await request.json<any>();
-        
+
         const tiketLama = await db.select().from(tickets).where(eq(tickets.id, ticketMatch[1])).limit(1);
-      
+
         await db.update(tickets).set({ status: data.status }).where(eq(tickets.id, ticketMatch[1])).returning();
-        
-        if (data.status === 'Selesai' && tiketLama.length > 0 && tiketLama[0].status !== 'Selesai') {
-        
+
+        if (data.status === "Selesai" && tiketLama.length > 0 && tiketLama[0].status !== "Selesai") {
           await kirimEmailSelesai(env, tiketLama[0]);
         }
 
-        return new Response(JSON.stringify({ success: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+        return new Response(JSON.stringify({ success: true }), { status: 200, headers: { "Content-Type": "application/json" } });
       }
-      
-      if (request.method === 'DELETE') {
+
+      if (request.method === "DELETE") {
         await db.delete(tickets).where(eq(tickets.id, ticketMatch[1])).returning();
-        return new Response(JSON.stringify({ success: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+        return new Response(JSON.stringify({ success: true }), { status: 200, headers: { "Content-Type": "application/json" } });
       }
     }
     return new Response("Not Found", { status: 404 });
