@@ -15,10 +15,33 @@ export interface Env {
 // 1. Fungsi Telegram (Saat Tiket Dibuat)
 async function kirimNotifikasiTelegram(env: Env, dataTiket: any) {
   if (!env.TELEGRAM_BOT_TOKEN || !env.TELEGRAM_CHAT_ID) return;
+
   const url = `https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`;
   const pesan = `🚨 *TIKET KENDALA BARU* 🚨\n\n*ID:* ${dataTiket.id}\n*Nama:* ${dataTiket.nama}\n*Lokasi:* Gedung ${dataTiket.gedung}, Lt.${dataTiket.lantai}, Kmr.${dataTiket.kamar}\n*Kendala:* ${dataTiket.kendala}\n\n*Waktu:* ${new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })}`;
-  try { await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chat_id: env.TELEGRAM_CHAT_ID, text: pesan, parse_mode: 'Markdown' }) }); } catch (e) {}
+
+  // 1. Memisahkan string dari env menjadi array, lalu menghapus spasi jika ada
+  const chatIds = env.TELEGRAM_CHAT_ID.split(',').map(id => id.trim());
+
+  // 2. Lakukan perulangan untuk mengirim pesan ke setiap chat_id
+  for (const chatId of chatIds) {
+    if (!chatId) continue; // Lewati jika ada elemen kosong akibat salah ketik koma
+    
+    try {
+      await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: chatId, // Menggunakan ID hasil perulangan
+          text: pesan,
+          parse_mode: 'Markdown'
+        })
+      });
+    } catch (e) {
+      console.error(`Gagal mengirim pesan ke ID ${chatId}:`, e);
+    }
+  }
 }
+
 
 // 2. Fungsi Kirim Email (Saat Tiket Dibuat)
 async function kirimEmailPenghuni(env: Env, dataTiket: any) {
