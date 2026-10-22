@@ -19,7 +19,7 @@ async function kirimNotifikasiTelegram(env: Env, dataTiket: any) {
   const url = `https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`;
   const pesan = `🚨 *TIKET KENDALA BARU* 🚨\n\n*ID:* ${dataTiket.id}\n*Nama:* ${dataTiket.nama}\n*Lokasi:* Gedung ${dataTiket.gedung}, Lt.${dataTiket.lantai}, Kmr.${dataTiket.kamar}\n*Kendala:* ${dataTiket.kendala}\n\n*Waktu:* ${new Date().toLocaleString("id-ID", { timeZone: "Asia/Jakarta" })}`;
 
-  // 1. Memisahkan string dari env menjadi array, lalu menghapus spasi jika ada
+  // 1. Memisahkan string dari env menjadi array,
   const chatIds = env.TELEGRAM_CHAT_ID.split(",").map((id) => id.trim());
 
   // 2. Lakukan perulangan untuk mengirim pesan ke setiap chat_id
